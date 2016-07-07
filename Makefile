@@ -9,6 +9,9 @@ test:
 build:
 	go build
 
+build-linux:
+	GOOS=linux GOARCH=amd64 go build -o proxy-linux
+
 rabbit:
 	docker run -d -p 5672:5672 -p 8081:15672 --name exynize-rabbit rabbitmq:management
 
