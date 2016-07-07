@@ -5,10 +5,19 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"regexp"
 
 	log "github.com/Sirupsen/logrus"
 	js "github.com/xeipuuv/gojsonschema"
 )
+
+// Response is a structure for sending response from proxy to consumer
+type Response struct {
+	Body     interface{} `json:"body"`     // body of the message
+	ReplyTo  string      `json:"replyTo"`  // replyto param from rabbitmq
+	Route    string      `json:"route"`    // route param from rabbit
+	NewRoute string      `json:"newRoute"` // new route for next message
+}
 
 func validateMessage(body map[string]interface{}) error {
 	schema := js.NewGoLoader(cfg.InputSchema)
@@ -33,6 +42,13 @@ func validateMessage(body map[string]interface{}) error {
 }
 
 func consumeMessages() {
+	// prepare route replacement regex
+	reg, err := regexp.Compile(cfg.Route + "-" + cfg.Version + "(.?)")
+	if err != nil {
+		log.Fatalf("Error compiling route regex: %s", err)
+	}
+
+	// consume messages
 	for d := range msgs {
 		// try to unmarshal incoming data
 		var body map[string]interface{}
@@ -43,7 +59,13 @@ func consumeMessages() {
 		}
 		replyTo := d.ReplyTo
 		route := d.RoutingKey
-		log.Infof(" [x] Got:\n  - body: %s\n  - replyTo: %s\n  - route: %s", body, replyTo, route)
+		newRoute := ""
+		if replyTo != "" {
+			newRoute = replyTo
+		} else {
+			newRoute = reg.ReplaceAllString(route, "")
+		}
+		log.Infof(" [x] Got:\n  - body: %s\n  - replyTo: %s\n  - route: %s\n  - newRoute: %s", body, replyTo, route, newRoute)
 
 		// validate document using input schema
 		err = validateMessage(body)
@@ -53,7 +75,7 @@ func consumeMessages() {
 		}
 
 		// create response body
-		r := Response{Body: body, ReplyTo: replyTo, Route: route}
+		r := Response{Body: body, ReplyTo: replyTo, Route: route, NewRoute: newRoute}
 		// try to marshal it to json
 		rbody, errMarshal := json.Marshal(r)
 		if errMarshal != nil {

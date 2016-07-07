@@ -14,13 +14,6 @@ var (
 	isProduction     = false
 )
 
-// Response is a structure for sending response from proxy to consumer
-type Response struct {
-	Body    interface{} `json:"body"`    // body of the message
-	ReplyTo string      `json:"replyTo"` // replyto param from rabbitmq
-	Route   string      `json:"route"`   // route param from rabbit
-}
-
 func failOnError(err error, msg string) {
 	if err != nil {
 		log.Fatalf("%s: %s", msg, err)
