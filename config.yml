@@ -1,3 +1,9 @@
 name: Test application
-route: exynize.newtest
+description: |
+  This is a very long string with a test application description.
+  Multiline and stuff
+version: v1
+
+route: exynize.test
+
 command: sh test.sh

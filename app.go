@@ -12,9 +12,18 @@ import (
 
 // ApplicationConfig describes application config.yml file
 type ApplicationConfig struct {
-	Name             string
-	Route            string
-	Command          string
+	// app info
+	Name        string
+	Description string
+	Version     string
+
+	// rabbit route base
+	Route string
+
+	// command to execute
+	Command string
+
+	// optional override for responseEndpoint
 	ResponseEndpoint string
 }
 
@@ -42,7 +51,7 @@ func initApp() {
 		responseEndpoint = cfg.ResponseEndpoint
 	}
 	if cfg.Route != "" {
-		routingKey = cfg.Route
+		routingKey = cfg.Route + "." + cfg.Version
 	}
 
 	// start app in new goroutine
