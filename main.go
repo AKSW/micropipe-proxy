@@ -1,6 +1,9 @@
 package main
 
-import log "github.com/Sirupsen/logrus"
+import (
+	log "github.com/Sirupsen/logrus"
+	"github.com/Sirupsen/logrus/formatters/logstash"
+)
 
 var (
 	host             = "amqp://localhost:5672/"
@@ -29,12 +32,8 @@ func main() {
 	readEnv()
 	// configure logger for production
 	if isProduction == true {
-		// Log as JSON instead of the default ASCII formatter.
-		log.SetFormatter(&log.JSONFormatter{})
-		// TODO: Output to ELK instead of stdout, could also be a file.
-		// log.SetOutput(os.Stderr)
-		// Only log the warning severity or above.
-		log.SetLevel(log.WarnLevel)
+		// Log as Logstash JSON instead of the default ASCII formatter
+		log.SetFormatter(&logstash.LogstashFormatter{})
 	}
 
 	// read app config and start the app
