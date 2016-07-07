@@ -37,6 +37,9 @@ func main() {
 		log.SetLevel(log.WarnLevel)
 	}
 
+	// read app config and start the app
+	initApp()
+
 	// connect to rabbit
 	connectToRabbit()
 
