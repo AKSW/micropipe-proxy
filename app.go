@@ -34,10 +34,7 @@ type ApplicationConfig struct {
 	ConfigSchema interface{} `yaml:"configSchema"`
 }
 
-var (
-	cfg               ApplicationConfig
-	inputSchemaString string
-)
+var cfg ApplicationConfig
 
 func initApp() {
 	cfg = ApplicationConfig{}

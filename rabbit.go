@@ -17,10 +17,13 @@ var (
 
 // HeartbeatInfo to be sent over heartbeat topic
 type HeartbeatInfo struct {
-	Name        string
-	Description string
-	Version     string
-	Route       string
+	Name         string
+	Description  string
+	Version      string
+	Route        string
+	InputSchema  interface{}
+	OutputSchema interface{}
+	ConfigSchema interface{}
 }
 
 func connectToRabbit() {
@@ -80,10 +83,13 @@ func connectToRabbit() {
 func sendHeartBeats() {
 	// generate heartbeat info object
 	dataBody := HeartbeatInfo{
-		Name:        cfg.Name,
-		Description: cfg.Description,
-		Version:     cfg.Version,
-		Route:       cfg.Route,
+		Name:         cfg.Name,
+		Description:  cfg.Description,
+		Version:      cfg.Version,
+		Route:        cfg.Route,
+		InputSchema:  cfg.InputSchema,
+		OutputSchema: cfg.OutputSchema,
+		ConfigSchema: cfg.ConfigSchema,
 	}
 	// marshal it into json
 	body, errMarshal := json.Marshal(dataBody)
