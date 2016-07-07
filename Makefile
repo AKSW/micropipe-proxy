@@ -1,7 +1,7 @@
 default: run
 
 run:
-	go run main.go
+	go run *.go
 
 test:
 	echo '{"route": "exynize.test", "data": {"test": "json"}}' | http POST localhost:8080
