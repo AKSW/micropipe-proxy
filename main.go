@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/streadway/amqp"
 )
@@ -14,6 +15,7 @@ var (
 	exchange         = "exynize"
 	routingKey       = "exynize.test"
 	responseEndpoint = "http://localhost:3000/"
+	serverListen     = ":8080"
 )
 
 // Response is a structure for sending response from proxy to consumer
@@ -30,6 +32,22 @@ func failOnError(err error, msg string) {
 }
 
 func main() {
+	// load config from environment
+	envHost := os.Getenv("EXYNIZE_HOST")
+	if envHost != "" {
+		host = envHost
+	}
+	envExchange := os.Getenv("EXYNIZE_EXCHANGE")
+	if envExchange != "" {
+		exchange = envExchange
+	}
+	envServerListen := os.Getenv("EXYNIZE_LISTEN")
+	if envServerListen != "" {
+		serverListen = envServerListen
+	}
+
+	// connect to rabbit
+	log.Printf("Connecting to %s with exchange %s", host, exchange)
 	conn, err := amqp.Dial(host)
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
@@ -110,8 +128,9 @@ func main() {
 			failOnError(err, "Failed to publish a message")
 			log.Printf(" [x] Sent %s", body)
 		})
-		err = http.ListenAndServe(":8080", nil)
+		err = http.ListenAndServe(serverListen, nil)
 		failOnError(err, "Failed to start a server")
+		log.Printf("Started server on: %s", serverListen)
 	}()
 
 	go func() {
