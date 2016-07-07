@@ -67,7 +67,7 @@ func startApp() {
 	scanner := bufio.NewScanner(stdOut)
 	go func() {
 		for scanner.Scan() {
-			log.Infof("  >> Child log:  %s\n", scanner.Text())
+			log.Infof("  >> Child log:  %s", scanner.Text())
 		}
 	}()
 
@@ -80,7 +80,7 @@ func startApp() {
 	stdErrScanner := bufio.NewScanner(stdErr)
 	go func() {
 		for stdErrScanner.Scan() {
-			log.Fatalf("  >> Child error: %s\n", stdErrScanner.Text())
+			log.Fatalf("  >> Child error: %s", stdErrScanner.Text())
 		}
 	}()
 
@@ -94,8 +94,8 @@ func startApp() {
 	err = cmd.Wait()
 	// go generate command will fail when no generate command find.
 	if err != nil {
-		if err.Error() != "exit status 1" {
-			log.Fatalf("Error waiting for app: %s", err)
-		}
+		log.Fatalf("Error waiting for app: %s", err)
 	}
+
+	log.Fatal("Error waiting for app - app exited!")
 }
