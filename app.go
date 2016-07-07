@@ -51,7 +51,7 @@ func initApp() {
 		responseEndpoint = cfg.ResponseEndpoint
 	}
 	if cfg.Route != "" {
-		routingKey = cfg.Route + "." + cfg.Version
+		routingKey = cfg.Route + "-" + cfg.Version + ".#"
 	}
 
 	// start app in new goroutine
