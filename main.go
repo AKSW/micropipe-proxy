@@ -3,10 +3,10 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"log"
 	"net/http"
 	"os"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/streadway/amqp"
 )
 
@@ -33,6 +33,7 @@ func failOnError(err error, msg string) {
 
 func main() {
 	// load config from environment
+	envProduction := os.Getenv("GO_ENV") == "production"
 	envHost := os.Getenv("EXYNIZE_HOST")
 	if envHost != "" {
 		host = envHost
@@ -46,8 +47,18 @@ func main() {
 		serverListen = envServerListen
 	}
 
+	// configure logger for production
+	if envProduction == true {
+		// Log as JSON instead of the default ASCII formatter.
+		log.SetFormatter(&log.JSONFormatter{})
+		// TODO: Output to ELK instead of stdout, could also be a file.
+		// log.SetOutput(os.Stderr)
+		// Only log the warning severity or above.
+		log.SetLevel(log.WarnLevel)
+	}
+
 	// connect to rabbit
-	log.Printf("Connecting to %s with exchange %s", host, exchange)
+	log.Infof("Connecting to %s with exchange %s", host, exchange)
 	conn, err := amqp.Dial(host)
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
@@ -77,7 +88,7 @@ func main() {
 	)
 	failOnError(err, "Failed to declare a queue")
 
-	log.Printf("Binding queue %s to exchange %s with routing key %s", q.Name, exchange, routingKey)
+	log.Infof("Binding queue %s to exchange %s with routing key %s", q.Name, exchange, routingKey)
 	err = ch.QueueBind(
 		q.Name,     // queue name
 		routingKey, // routing key
@@ -105,15 +116,15 @@ func main() {
 			var data map[string]interface{}
 			err = decoder.Decode(&data)
 			if err != nil {
-				log.Printf("Couldn't read request body")
+				log.Errorf("Couldn't read request body")
 				return
 			}
-			log.Printf("Got request body: %s", data)
+			log.Infof("Got request body: %s", data)
 			route := data["route"].(string)
 			dataBody := data["data"].(interface{})
 			body, errMarshal := json.Marshal(dataBody)
 			if errMarshal != nil {
-				log.Printf("Couldn't marshal body")
+				log.Errorf("Couldn't marshal body")
 				return
 			}
 			err = ch.Publish(
@@ -126,11 +137,11 @@ func main() {
 					Body:        []byte(body),
 				})
 			failOnError(err, "Failed to publish a message")
-			log.Printf(" [x] Sent %s", body)
+			log.Infof(" [x] Sent %s", body)
 		})
 		err = http.ListenAndServe(serverListen, nil)
 		failOnError(err, "Failed to start a server")
-		log.Printf("Started server on: %s", serverListen)
+		log.Infof("Started server on: %s", serverListen)
 	}()
 
 	go func() {
@@ -138,28 +149,28 @@ func main() {
 			var body map[string]interface{}
 			err = json.Unmarshal(d.Body, &body)
 			if err != nil {
-				log.Printf("Couldn't decode message body")
+				log.Errorf("Couldn't decode message body")
 				return
 			}
 			replyTo := d.ReplyTo
 			route := d.RoutingKey
-			log.Printf(" [x] Got:\n  - body: %s\n  - replyTo: %s\n  - route: %s", body, replyTo, route)
+			log.Infof(" [x] Got:\n  - body: %s\n  - replyTo: %s\n  - route: %s", body, replyTo, route)
 			r := Response{Body: body, ReplyTo: replyTo, Route: route}
 			rbody, errMarshal := json.Marshal(r)
 			if errMarshal != nil {
-				log.Printf("Couldn't marshal response body")
+				log.Errorf("Couldn't marshal response body")
 				return
 			}
-			log.Printf(" [x] prepared response: %s", rbody)
+			log.Infof(" [x] prepared response: %s", rbody)
 			resp, err := http.Post(responseEndpoint, "application/json", bytes.NewBuffer(rbody))
 			if err != nil {
-				log.Printf("Couldn't send POST request to consumer")
+				log.Errorf("Couldn't send POST request to consumer")
 			} else {
-				log.Printf(" [x] Sent via REST: %s", resp.Status)
+				log.Infof(" [x] Sent via REST: %s", resp.Status)
 			}
 		}
 	}()
 
-	log.Printf(" [*] Waiting for logs. To exit press CTRL+C")
+	log.Infof(" [*] Waiting for logs. To exit press CTRL+C")
 	<-forever
 }
