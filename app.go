@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
-	"gopkg.in/yaml.v2"
+	"github.com/ghodss/yaml"
 )
 
 // ApplicationConfig describes application config.yml file
@@ -24,10 +24,20 @@ type ApplicationConfig struct {
 	Command string
 
 	// optional override for responseEndpoint
-	ResponseEndpoint string
+	ResponseEndpoint string `yaml:"responseEndpoint"`
+
+	// input schema
+	InputSchema interface{} `yaml:"inputSchema"`
+	// output schema
+	OutputSchema interface{} `yaml:"outputSchema"`
+	// config schema
+	ConfigSchema interface{} `yaml:"configSchema"`
 }
 
-var cfg ApplicationConfig
+var (
+	cfg               ApplicationConfig
+	inputSchemaString string
+)
 
 func initApp() {
 	cfg = ApplicationConfig{}
