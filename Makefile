@@ -6,6 +6,9 @@ run:
 test:
 	echo '{"route": "test-v1", "replyTo": "test-v1", "config": {"test123": {"param": "ok"}}, "data": {"text": "ok"}}' | http POST localhost:8080
 
+test-noconfig:
+	echo '{"route": "test-v1", "replyTo": "test-v1", "data": {"text": "ok"}}' | http POST localhost:8080
+
 test-sentiments:
 	echo '{"route": "sentiments-v1.test-v1", "replyTo": "test-v1", "config": {"sentiments": {"test": "ok"}}, "data": {"text": "I am very awesome text!"}}' | http POST localhost:8080
 

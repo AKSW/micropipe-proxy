@@ -13,11 +13,11 @@ import (
 
 // Response is a structure for sending response from proxy to consumer
 type Response struct {
-	Body     interface{} `json:"body"`             // body of the message
-	Config   interface{} `json:"config,omitempty"` // configs passed to service
-	ReplyTo  string      `json:"replyTo"`          // replyto param from rabbitmq
-	Route    string      `json:"route"`            // route param from rabbit
-	NewRoute string      `json:"newRoute"`         // new route for next message
+	Body     interface{} `json:"body"`     // body of the message
+	Config   interface{} `json:"config"`   // configs passed to service
+	ReplyTo  string      `json:"replyTo"`  // replyto param from rabbitmq
+	Route    string      `json:"route"`    // route param from rabbit
+	NewRoute string      `json:"newRoute"` // new route for next message
 }
 
 func validateDataWithSchema(body interface{}, testSchema interface{}) error {
@@ -57,7 +57,11 @@ func consumeMessages() {
 			continue
 		}
 		body := payload["data"].(interface{})
-		config := payload["config"].(map[string]interface{})
+		// get config if possible
+		config := map[string]interface{}(nil)
+		if payload["config"] != nil {
+			config = payload["config"].(map[string]interface{})
+		}
 		replyTo := d.ReplyTo
 		route := d.RoutingKey
 		newRoute := ""
@@ -76,10 +80,9 @@ func consumeMessages() {
 		}
 		log.Infof("Input data is valid")
 
-		// get current service config
-		serviceConfig := interface{}(nil)
+		// if current service config is present, validate it
 		if config[cfg.ID] != nil {
-			serviceConfig = config[cfg.ID].(interface{})
+			serviceConfig := config[cfg.ID].(interface{})
 			// validate config
 			err = validateDataWithSchema(serviceConfig, cfg.ConfigSchema)
 			if err != nil {
@@ -90,7 +93,7 @@ func consumeMessages() {
 		}
 
 		// create response body
-		r := Response{Body: body, Config: serviceConfig, ReplyTo: replyTo, Route: route, NewRoute: newRoute}
+		r := Response{Body: body, Config: config, ReplyTo: replyTo, Route: route, NewRoute: newRoute}
 		// try to marshal it to json
 		rbody, errMarshal := json.Marshal(r)
 		if errMarshal != nil {

@@ -8,6 +8,7 @@ import (
 	"github.com/streadway/amqp"
 )
 
+// Payload to be encoded for message bus
 type Payload struct {
 	Data   interface{} `json:"data"`
 	Config interface{} `json:"config"`
@@ -25,7 +26,11 @@ func initServer() {
 		log.Infof("Got request body: %s", data)
 		route := data["route"].(string)
 		dataBody := data["data"].(interface{})
-		configBody := data["config"].(interface{})
+		// try to get config
+		configBody := interface{}(nil)
+		if data["config"] != nil {
+			configBody = data["config"].(interface{})
+		}
 		replyTo := ""
 		if data["replyTo"] != nil {
 			replyTo = data["replyTo"].(string)
