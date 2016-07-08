@@ -20,6 +20,10 @@ func initServer() {
 		log.Infof("Got request body: %s", data)
 		route := data["route"].(string)
 		dataBody := data["data"].(interface{})
+		replyTo := ""
+		if data["replyTo"] != nil {
+			replyTo = data["replyTo"].(string)
+		}
 		body, errMarshal := json.Marshal(dataBody)
 		if errMarshal != nil {
 			log.Errorf("Couldn't marshal body")
@@ -33,7 +37,7 @@ func initServer() {
 			amqp.Publishing{
 				ContentType: "text/plain",
 				Body:        []byte(body),
-				ReplyTo:     data["replyTo"].(string),
+				ReplyTo:     replyTo,
 			})
 		failOnError(err, "Failed to publish a message")
 		log.Infof(" [x] Sent %s", body)

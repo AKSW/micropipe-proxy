@@ -13,12 +13,10 @@ import (
 // ApplicationConfig describes application config.yml file
 type ApplicationConfig struct {
 	// app info
+	ID          string `yaml:"id"`
 	Name        string
 	Description string
 	Version     string
-
-	// rabbit route base
-	Route string
 
 	// command to execute
 	Command string
@@ -57,9 +55,7 @@ func initApp() {
 	if cfg.ResponseEndpoint != "" {
 		responseEndpoint = cfg.ResponseEndpoint
 	}
-	if cfg.Route != "" {
-		routingKey = cfg.Route + "-" + cfg.Version + ".#"
-	}
+	routingKey = cfg.ID + "-" + cfg.Version + ".#"
 
 	// start app in new goroutine
 	go startApp()

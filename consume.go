@@ -43,7 +43,7 @@ func validateMessage(body map[string]interface{}) error {
 
 func consumeMessages() {
 	// prepare route replacement regex
-	reg, err := regexp.Compile(cfg.Route + "-" + cfg.Version + "(.?)")
+	reg, err := regexp.Compile(cfg.ID + "-" + cfg.Version + "(.?)")
 	if err != nil {
 		log.Fatalf("Error compiling route regex: %s", err)
 	}

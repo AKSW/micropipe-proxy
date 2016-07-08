@@ -1,12 +1,10 @@
 # basic application info
+id: test
 name: Test application
 description: |
   This is a very long string with a test application description.
   Multiline and stuff
 version: v1
-
-# base route to bind to
-route: test
 
 # command to be executed as child service
 command: sh test.sh
