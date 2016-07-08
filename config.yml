@@ -35,4 +35,5 @@ outputSchema:
 configSchema:
   type: object
   properties:
-    test: string
+    param:
+      type: string

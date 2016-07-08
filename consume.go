@@ -14,23 +14,22 @@ import (
 // Response is a structure for sending response from proxy to consumer
 type Response struct {
 	Body     interface{} `json:"body"`     // body of the message
+	Config   interface{} `json:"config"`   // configs passed to service
 	ReplyTo  string      `json:"replyTo"`  // replyto param from rabbitmq
 	Route    string      `json:"route"`    // route param from rabbit
 	NewRoute string      `json:"newRoute"` // new route for next message
 }
 
-func validateMessage(body map[string]interface{}) error {
-	schema := js.NewGoLoader(cfg.InputSchema)
+func validateDataWithSchema(body interface{}, testSchema interface{}) error {
+	schema := js.NewGoLoader(testSchema)
 	doc := js.NewGoLoader(body)
 
 	result, err := js.Validate(schema, doc)
 	if err != nil {
-		log.Errorf("Error validating message: %s", err)
 		return err
 	}
 
 	if result.Valid() {
-		log.Infof("The document is valid")
 		return nil
 	}
 
@@ -51,12 +50,14 @@ func consumeMessages() {
 	// consume messages
 	for d := range msgs {
 		// try to unmarshal incoming data
-		var body map[string]interface{}
-		err := json.Unmarshal(d.Body, &body)
+		var payload map[string]interface{}
+		err := json.Unmarshal(d.Body, &payload)
 		if err != nil {
-			log.Errorf("Couldn't decode message body")
+			log.Errorf("Couldn't decode message payload")
 			continue
 		}
+		body := payload["data"].(interface{})
+		config := payload["config"].(map[string]interface{})
 		replyTo := d.ReplyTo
 		route := d.RoutingKey
 		newRoute := ""
@@ -65,17 +66,28 @@ func consumeMessages() {
 		} else {
 			newRoute = reg.ReplaceAllString(route, "")
 		}
-		log.Infof(" [x] Got:\n  - body: %s\n  - replyTo: %s\n  - route: %s\n  - newRoute: %s", body, replyTo, route, newRoute)
+		log.Infof(" [x] Got:\n  - body: %s\n  - config: %s\n  - replyTo: %s\n  - route: %s\n  - newRoute: %s", body, config, replyTo, route, newRoute)
 
 		// validate document using input schema
-		err = validateMessage(body)
+		err = validateDataWithSchema(body, cfg.InputSchema)
 		if err != nil {
 			log.Errorf("Error validating input: %s", err)
 			continue
 		}
+		log.Infof("Input data is valid")
+
+		// get current service config
+		serviceConfig := config[cfg.ID].(interface{})
+		// validate config
+		err = validateDataWithSchema(serviceConfig, cfg.ConfigSchema)
+		if err != nil {
+			log.Errorf("Error validating config: %s", err)
+			continue
+		}
+		log.Infof("Config is valid")
 
 		// create response body
-		r := Response{Body: body, ReplyTo: replyTo, Route: route, NewRoute: newRoute}
+		r := Response{Body: body, Config: serviceConfig, ReplyTo: replyTo, Route: route, NewRoute: newRoute}
 		// try to marshal it to json
 		rbody, errMarshal := json.Marshal(r)
 		if errMarshal != nil {

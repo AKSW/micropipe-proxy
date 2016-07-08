@@ -8,6 +8,11 @@ import (
 	"github.com/streadway/amqp"
 )
 
+type Payload struct {
+	Data   interface{} `json:"data"`
+	Config interface{} `json:"config"`
+}
+
 func initServer() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		decoder := json.NewDecoder(r.Body)
@@ -20,11 +25,13 @@ func initServer() {
 		log.Infof("Got request body: %s", data)
 		route := data["route"].(string)
 		dataBody := data["data"].(interface{})
+		configBody := data["config"].(interface{})
 		replyTo := ""
 		if data["replyTo"] != nil {
 			replyTo = data["replyTo"].(string)
 		}
-		body, errMarshal := json.Marshal(dataBody)
+		payload := Payload{Data: dataBody, Config: configBody}
+		body, errMarshal := json.Marshal(payload)
 		if errMarshal != nil {
 			log.Errorf("Couldn't marshal body")
 			return

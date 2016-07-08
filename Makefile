@@ -4,7 +4,7 @@ run:
 	go run *.go
 
 test:
-	echo '{"route": "test-v1", "replyTo": "test-v1", "data": {"test": "json"}}' | http POST localhost:8080
+	echo '{"route": "test-v1", "replyTo": "test-v1", "config": {"test": {"param": "ok"}}, "data": {"text": "ok"}}' | http POST localhost:8080
 
 build:
 	go build
