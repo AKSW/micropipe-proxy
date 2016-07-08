@@ -13,11 +13,11 @@ import (
 
 // Response is a structure for sending response from proxy to consumer
 type Response struct {
-	Body     interface{} `json:"body"`     // body of the message
-	Config   interface{} `json:"config"`   // configs passed to service
-	ReplyTo  string      `json:"replyTo"`  // replyto param from rabbitmq
-	Route    string      `json:"route"`    // route param from rabbit
-	NewRoute string      `json:"newRoute"` // new route for next message
+	Body     interface{} `json:"body"`             // body of the message
+	Config   interface{} `json:"config,omitempty"` // configs passed to service
+	ReplyTo  string      `json:"replyTo"`          // replyto param from rabbitmq
+	Route    string      `json:"route"`            // route param from rabbit
+	NewRoute string      `json:"newRoute"`         // new route for next message
 }
 
 func validateDataWithSchema(body interface{}, testSchema interface{}) error {
@@ -77,14 +77,17 @@ func consumeMessages() {
 		log.Infof("Input data is valid")
 
 		// get current service config
-		serviceConfig := config[cfg.ID].(interface{})
-		// validate config
-		err = validateDataWithSchema(serviceConfig, cfg.ConfigSchema)
-		if err != nil {
-			log.Errorf("Error validating config: %s", err)
-			continue
+		serviceConfig := interface{}(nil)
+		if config[cfg.ID] != nil {
+			serviceConfig = config[cfg.ID].(interface{})
+			// validate config
+			err = validateDataWithSchema(serviceConfig, cfg.ConfigSchema)
+			if err != nil {
+				log.Errorf("Error validating config: %s", err)
+				continue
+			}
+			log.Infof("Config is valid")
 		}
-		log.Infof("Config is valid")
 
 		// create response body
 		r := Response{Body: body, Config: serviceConfig, ReplyTo: replyTo, Route: route, NewRoute: newRoute}
