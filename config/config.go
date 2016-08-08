@@ -32,6 +32,25 @@ type ApplicationConfig struct {
 // Cfg holds application current config
 var Cfg ApplicationConfig
 
+// Fixes parsed YAML to conform to JSON string->interface{} format
+func fixJSON(input map[interface{}]interface{}) map[string]interface{} {
+	fixedInput := make(map[string]interface{})
+	for key, value := range input {
+		switch key := key.(type) {
+		case string:
+			switch value := value.(type) {
+			case string:
+				fixedInput[key] = value
+			case map[interface{}]interface{}:
+				fixedInput[key] = fixJSON(value)
+			}
+		default:
+			log.Debugf("other key: %s", key)
+		}
+	}
+	return fixedInput
+}
+
 // ReadYamlConfig reads config from file
 func ReadYamlConfig() {
 	Cfg = ApplicationConfig{}
@@ -48,6 +67,9 @@ func ReadYamlConfig() {
 	}
 
 	log.Infof("Got application config:")
+	Cfg.InputSchema = fixJSON(Cfg.InputSchema.(map[interface{}]interface{}))
+	Cfg.OutputSchema = fixJSON(Cfg.OutputSchema.(map[interface{}]interface{}))
+	Cfg.ConfigSchema = fixJSON(Cfg.ConfigSchema.(map[interface{}]interface{}))
 	log.Info(Cfg)
 
 	// update configs

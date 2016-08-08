@@ -16,6 +16,13 @@ responseEndpoint: http://localhost:3000
 inputSchema:
   type: object
   properties:
+    subobj:
+      type: object
+      properties:
+        test:
+          type: string
+      required:
+        - test
     text:
       type: string
   required:
@@ -36,4 +43,11 @@ configSchema:
   type: object
   properties:
     sentimentConfig:
-      type: string
+      type: object
+      properties:
+        one:
+          type: string
+      required:
+        - one
+  required:
+    - sentimentConfig
