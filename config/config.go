@@ -66,10 +66,27 @@ func ReadYamlConfig() {
 		log.Fatalf("error: %v", err)
 	}
 
+	// convert InputSchema to correct format
+	if Cfg.InputSchema != nil {
+		Cfg.InputSchema = fixJSON(Cfg.InputSchema.(map[interface{}]interface{}))
+	} else {
+		Cfg.InputSchema = make(map[string]interface{})
+	}
+	// convert OutputSchema to correct format
+	if Cfg.OutputSchema != nil {
+		Cfg.OutputSchema = fixJSON(Cfg.OutputSchema.(map[interface{}]interface{}))
+	} else {
+		Cfg.OutputSchema = make(map[string]interface{})
+	}
+	// correct ConfigSchema to correct format
+	if Cfg.ConfigSchema != nil {
+		Cfg.ConfigSchema = fixJSON(Cfg.ConfigSchema.(map[interface{}]interface{}))
+	} else {
+		Cfg.ConfigSchema = make(map[string]interface{})
+	}
+
+	// log
 	log.Infof("Got application config:")
-	Cfg.InputSchema = fixJSON(Cfg.InputSchema.(map[interface{}]interface{}))
-	Cfg.OutputSchema = fixJSON(Cfg.OutputSchema.(map[interface{}]interface{}))
-	Cfg.ConfigSchema = fixJSON(Cfg.ConfigSchema.(map[interface{}]interface{}))
 	log.Info(Cfg)
 
 	// update configs
