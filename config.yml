@@ -35,5 +35,5 @@ outputSchema:
 configSchema:
   type: object
   properties:
-    param:
+    sentimentConfig:
       type: string

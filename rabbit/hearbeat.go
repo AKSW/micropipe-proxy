@@ -20,13 +20,13 @@ func failOnError(err error, msg string) {
 func sendHeartBeats() {
 	// generate heartbeat info object
 	dataBody := HeartbeatInfo{
-		ID:           config.Cfg.ID,
-		Name:         config.Cfg.Name,
-		Description:  config.Cfg.Description,
-		Version:      config.Cfg.Version,
-		InputSchema:  config.Cfg.InputSchema,
-		OutputSchema: config.Cfg.OutputSchema,
-		ConfigSchema: config.Cfg.ConfigSchema,
+		ID:          config.Cfg.ID,
+		Name:        config.Cfg.Name,
+		Description: config.Cfg.Description,
+		Version:     config.Cfg.Version,
+		// InputSchema: config.Cfg.InputSchema,
+		// OutputSchema: config.Cfg.OutputSchema,
+		// ConfigSchema: config.Cfg.ConfigSchema,
 	}
 	// marshal it into json
 	body, errMarshal := json.Marshal(dataBody)

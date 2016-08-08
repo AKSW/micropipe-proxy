@@ -14,6 +14,9 @@ test-noconfig:
 test-sentiments:
 	echo '{"route": "sentiments-v1.test-v1", "replyTo": "test-v1", "config": {"sentiments": {"test": "ok"}}, "data": {"text": "I am very awesome text!"}}' | http POST localhost:8080
 
+test-health:
+	http GET localhost:8080/health
+
 build:
 	go build
 

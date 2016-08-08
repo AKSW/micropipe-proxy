@@ -18,6 +18,7 @@ type Payload struct {
 
 // InitResponseServer inits response server
 func InitResponseServer() {
+	// Message handler
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		decoder := json.NewDecoder(r.Body)
 		var data map[string]interface{}
@@ -56,6 +57,10 @@ func InitResponseServer() {
 			})
 		failOnError(err, "Failed to publish a message")
 		log.Infof(" [x] Sent %s", body)
+	})
+	// Health checks handler
+	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		log.Infof(" [x] Healthcheck..")
 	})
 	err := http.ListenAndServe(config.ServerListen, nil)
 	failOnError(err, "Failed to start a server")
