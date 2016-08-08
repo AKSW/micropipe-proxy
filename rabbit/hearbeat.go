@@ -11,6 +11,14 @@ import (
 	"github.com/streadway/amqp"
 )
 
+// HeartbeatInfo to be sent over heartbeat topic
+type HeartbeatInfo struct {
+	ID          string
+	Name        string
+	Description string
+	Version     string
+}
+
 func failOnError(err error, msg string) {
 	if err != nil {
 		log.Fatalf("%s: %s", msg, err)
@@ -24,9 +32,6 @@ func sendHeartBeats() {
 		Name:        config.Cfg.Name,
 		Description: config.Cfg.Description,
 		Version:     config.Cfg.Version,
-		// InputSchema: config.Cfg.InputSchema,
-		// OutputSchema: config.Cfg.OutputSchema,
-		// ConfigSchema: config.Cfg.ConfigSchema,
 	}
 	// marshal it into json
 	body, errMarshal := json.Marshal(dataBody)

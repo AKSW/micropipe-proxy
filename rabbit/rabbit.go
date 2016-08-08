@@ -12,17 +12,6 @@ var (
 	msgs <-chan amqp.Delivery
 )
 
-// HeartbeatInfo to be sent over heartbeat topic
-type HeartbeatInfo struct {
-	ID           string
-	Name         string
-	Description  string
-	Version      string
-	InputSchema  interface{}
-	OutputSchema interface{}
-	ConfigSchema interface{}
-}
-
 // ConnectToRabbit establishes connection to RabbitMQ
 func ConnectToRabbit() {
 	log.Infof("Connecting to \"%s\" with exchange \"%s\"", config.Host, config.Exchange)
