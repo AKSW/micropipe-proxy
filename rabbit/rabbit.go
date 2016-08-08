@@ -12,6 +12,12 @@ var (
 	msgs <-chan amqp.Delivery
 )
 
+func failOnError(err error, msg string) {
+	if err != nil {
+		log.Fatalf("%s: %s", msg, err)
+	}
+}
+
 // ConnectToRabbit establishes connection to RabbitMQ
 func ConnectToRabbit() {
 	log.Infof("Connecting to \"%s\" with exchange \"%s\"", config.Host, config.Exchange)
@@ -62,7 +68,4 @@ func ConnectToRabbit() {
 		nil,    // args
 	)
 	failOnError(err, "Failed to register a consumer")
-
-	// send heartbeats
-	sendHeartBeats()
 }
