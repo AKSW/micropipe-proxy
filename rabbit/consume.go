@@ -1,4 +1,4 @@
-package main
+package rabbit
 
 import (
 	"bytes"
@@ -6,6 +6,8 @@ import (
 	"errors"
 	"net/http"
 	"regexp"
+
+	appconfig "gitlab.com/exynize/proxy/config"
 
 	log "github.com/Sirupsen/logrus"
 	js "github.com/xeipuuv/gojsonschema"
@@ -40,9 +42,10 @@ func validateDataWithSchema(body interface{}, testSchema interface{}) error {
 	return errors.New("Docment not valid")
 }
 
-func consumeMessages() {
+// ConsumeMessages starts message consumption
+func ConsumeMessages() {
 	// prepare route replacement regex
-	reg, err := regexp.Compile(cfg.ID + "-" + cfg.Version + "(.?)")
+	reg, err := regexp.Compile(appconfig.Cfg.ID + "-" + appconfig.Cfg.Version + "(.?)")
 	if err != nil {
 		log.Fatalf("Error compiling route regex: %s", err)
 	}
@@ -73,7 +76,7 @@ func consumeMessages() {
 		log.Infof(" [x] Got:\n  - body: %s\n  - config: %s\n  - replyTo: %s\n  - route: %s\n  - newRoute: %s", body, config, replyTo, route, newRoute)
 
 		// validate document using input schema
-		err = validateDataWithSchema(body, cfg.InputSchema)
+		err = validateDataWithSchema(body, appconfig.Cfg.InputSchema)
 		if err != nil {
 			log.Errorf("Error validating input: %s", err)
 			continue
@@ -81,10 +84,10 @@ func consumeMessages() {
 		log.Infof("Input data is valid")
 
 		// if current service config is present, validate it
-		if config[cfg.ID] != nil {
-			serviceConfig := config[cfg.ID].(interface{})
+		if config[appconfig.Cfg.ID] != nil {
+			serviceConfig := config[appconfig.Cfg.ID].(interface{})
 			// validate config
-			err = validateDataWithSchema(serviceConfig, cfg.ConfigSchema)
+			err = validateDataWithSchema(serviceConfig, appconfig.Cfg.ConfigSchema)
 			if err != nil {
 				log.Errorf("Error validating config: %s", err)
 				continue
@@ -103,7 +106,7 @@ func consumeMessages() {
 		log.Infof(" [x] prepared response: %s", rbody)
 
 		// try sending it to the response endpoint
-		resp, err := http.Post(responseEndpoint, "application/json", bytes.NewBuffer(rbody))
+		resp, err := http.Post(appconfig.ResponseEndpoint, "application/json", bytes.NewBuffer(rbody))
 		if err != nil {
 			log.Errorf("Couldn't send POST request to consumer")
 		} else {

@@ -1,69 +1,17 @@
-package main
+package app
 
 import (
 	"bufio"
-	"io/ioutil"
 	"os/exec"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/ghodss/yaml"
+	"gitlab.com/exynize/proxy/config"
 )
-
-// ApplicationConfig describes application config.yml file
-type ApplicationConfig struct {
-	// app info
-	ID          string `yaml:"id"`
-	Name        string
-	Description string
-	Version     string
-
-	// command to execute
-	Command string
-
-	// optional override for responseEndpoint
-	ResponseEndpoint string `yaml:"responseEndpoint"`
-
-	// input schema
-	InputSchema interface{} `yaml:"inputSchema"`
-	// output schema
-	OutputSchema interface{} `yaml:"outputSchema"`
-	// config schema
-	ConfigSchema interface{} `yaml:"configSchema"`
-}
-
-var cfg ApplicationConfig
-
-func initApp() {
-	cfg = ApplicationConfig{}
-
-	// read the whole file at once
-	cfgYaml, err := ioutil.ReadFile("config.yml")
-	if err != nil {
-		panic(err)
-	}
-
-	err = yaml.Unmarshal([]byte(cfgYaml), &cfg)
-	if err != nil {
-		log.Fatalf("error: %v", err)
-	}
-
-	log.Infof("Got application config:")
-	log.Info(cfg)
-
-	// update configs
-	if cfg.ResponseEndpoint != "" {
-		responseEndpoint = cfg.ResponseEndpoint
-	}
-	routingKey = cfg.ID + "-" + cfg.Version + ".#"
-
-	// start app in new goroutine
-	go startApp()
-}
 
 func startApp() {
 	// parse command
-	parts := strings.Fields(cfg.Command)
+	parts := strings.Fields(config.Cfg.Command)
 	executable := parts[0]
 	args := parts[1:]
 	log.Infof("Starting app with command: %s - and args: %s", executable, args)

@@ -1,5 +1,7 @@
 default: run
 
+.PHONY: rabbit
+
 run:
 	go run *.go
 

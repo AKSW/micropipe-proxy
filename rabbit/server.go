@@ -1,8 +1,10 @@
-package main
+package rabbit
 
 import (
 	"encoding/json"
 	"net/http"
+
+	"gitlab.com/exynize/proxy/config"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/streadway/amqp"
@@ -14,7 +16,8 @@ type Payload struct {
 	Config interface{} `json:"config"`
 }
 
-func initServer() {
+// InitResponseServer inits response server
+func InitResponseServer() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		decoder := json.NewDecoder(r.Body)
 		var data map[string]interface{}
@@ -42,10 +45,10 @@ func initServer() {
 			return
 		}
 		err = ch.Publish(
-			exchange, // exchange
-			route,    // routing key
-			false,    // mandatory
-			false,    // immediate
+			config.Exchange, // exchange
+			route,           // routing key
+			false,           // mandatory
+			false,           // immediate
 			amqp.Publishing{
 				ContentType: "text/plain",
 				Body:        []byte(body),
@@ -54,7 +57,7 @@ func initServer() {
 		failOnError(err, "Failed to publish a message")
 		log.Infof(" [x] Sent %s", body)
 	})
-	err := http.ListenAndServe(serverListen, nil)
+	err := http.ListenAndServe(config.ServerListen, nil)
 	failOnError(err, "Failed to start a server")
-	log.Infof("Started server on: %s", serverListen)
+	log.Infof("Started server on: %s", config.ServerListen)
 }
