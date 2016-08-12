@@ -59,7 +59,10 @@ func ConsumeMessages() {
 			log.Errorf("Couldn't decode message payload")
 			continue
 		}
-		body := payload["data"].(interface{})
+		body := interface{}(nil)
+		if payload["data"] != nil {
+			body = payload["data"].(interface{})
+		}
 		// get config if possible
 		config := map[string]interface{}(nil)
 		if payload["config"] != nil {

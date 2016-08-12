@@ -28,8 +28,14 @@ func InitResponseServer() {
 			return
 		}
 		log.Infof("Got request body: %s", data)
-		route := data["route"].(string)
-		dataBody := data["data"].(interface{})
+		route := ""
+		if data["route"] != nil {
+			route = data["route"].(string)
+		}
+		dataBody := interface{}(nil)
+		if data["data"] != nil {
+			dataBody = data["data"].(interface{})
+		}
 		// try to get config
 		configBody := interface{}(nil)
 		if data["config"] != nil {
