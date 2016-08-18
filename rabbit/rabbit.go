@@ -32,11 +32,11 @@ func ConnectToRabbit(retries int) {
 	conn, err = amqp.Dial(config.Host)
 	if err != nil {
 		if retries > 0 {
+			newTries := retries - 1
 			log.Infof("Failed to connect, retrying %s more times...", newTries)
 			// sleep
 			t := 2000 * time.Duration(maxRetries+1-retries) * time.Millisecond
 			time.Sleep(t)
-			newTries := retries - 1
 			ConnectToRabbit(newTries)
 			return
 		}
