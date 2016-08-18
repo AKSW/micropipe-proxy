@@ -1,15 +1,18 @@
 package rabbit
 
 import (
+	"time"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/streadway/amqp"
 	"gitlab.com/exynize/proxy/config"
 )
 
 var (
-	conn *amqp.Connection
-	ch   *amqp.Channel
-	msgs <-chan amqp.Delivery
+	conn       *amqp.Connection
+	ch         *amqp.Channel
+	msgs       <-chan amqp.Delivery
+	maxRetries = 3
 )
 
 func failOnError(err error, msg string) {
@@ -19,11 +22,27 @@ func failOnError(err error, msg string) {
 }
 
 // ConnectToRabbit establishes connection to RabbitMQ
-func ConnectToRabbit() {
+func ConnectToRabbit(retries int) {
+	if retries > maxRetries {
+		retries = maxRetries
+	}
+
 	log.Infof("Connecting to \"%s\" with exchange \"%s\"", config.Host, config.Exchange)
 	var err error
 	conn, err = amqp.Dial(config.Host)
-	failOnError(err, "Failed to connect to RabbitMQ")
+	if err != nil {
+		if retries > 0 {
+			log.Infof("Failed to connect, retrying %s more times...", newTries)
+			// sleep
+			t := 2000 * time.Duration(maxRetries+1-retries) * time.Millisecond
+			time.Sleep(t)
+			newTries := retries - 1
+			ConnectToRabbit(newTries)
+			return
+		}
+
+		failOnError(err, "Failed to connect to RabbitMQ")
+	}
 
 	ch, err = conn.Channel()
 	failOnError(err, "Failed to open a channel")

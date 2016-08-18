@@ -9,8 +9,8 @@ import (
 func main() {
 	// read app config and start the app
 	app.InitApp()
-	// connect to rabbit
-	rabbit.ConnectToRabbit()
+	// connect to rabbit, 3 retries
+	rabbit.ConnectToRabbit(3)
 	// create endless channel
 	forever := make(chan bool)
 	// init REST server
