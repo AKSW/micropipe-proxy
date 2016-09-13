@@ -4,12 +4,14 @@ import (
 	"io/ioutil"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/nu7hatch/gouuid"
 	"gopkg.in/yaml.v2"
 )
 
 // ApplicationConfig describes application config.yml file
 type ApplicationConfig struct {
 	// app info
+	UID         string
 	ID          string `yaml:"id"`
 	Name        string
 	Description string
@@ -84,6 +86,13 @@ func ReadYamlConfig() {
 	} else {
 		Cfg.ConfigSchema = make(map[string]interface{})
 	}
+
+	// generate unique ID
+	uid, err := uuid.NewV4()
+	if err != nil {
+		log.Fatalf("Error generating uid: %s", err)
+	}
+	Cfg.UID = uid.String()
 
 	// log
 	log.Infof("Got application config:")
