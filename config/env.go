@@ -9,6 +9,8 @@ var (
 	Exchange = "exynize"
 	// RoutingKey to be used with RabbitMQ
 	RoutingKey = "exynize.test"
+	// RoutingUniqueKey to be used with RabbitMQ
+	RoutingUniqueKey = "exynize.test.unique"
 	// ResponseEndpoint to be used for incoming messages
 	ResponseEndpoint = "http://localhost:3000/"
 	// ServerListen bind for server for replies

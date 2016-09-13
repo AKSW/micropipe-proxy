@@ -103,4 +103,5 @@ func ReadYamlConfig() {
 		ResponseEndpoint = Cfg.ResponseEndpoint
 	}
 	RoutingKey = Cfg.ID + "-" + Cfg.Version + ".#"
+	RoutingUniqueKey = Cfg.ID + "-" + Cfg.UID + ".#"
 }

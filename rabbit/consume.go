@@ -10,6 +10,7 @@ import (
 	appconfig "gitlab.com/exynize/proxy/config"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/streadway/amqp"
 	js "github.com/xeipuuv/gojsonschema"
 )
 
@@ -49,9 +50,21 @@ func ConsumeMessages() {
 	if err != nil {
 		log.Fatalf("Error compiling route regex: %s", err)
 	}
+	// consume normal messages
+	consumeFromMessages(msgs, reg)
 
-	// consume messages
-	for d := range msgs {
+	// prepare route replacement regex
+	ureg, uerr := regexp.Compile(appconfig.Cfg.ID + "-" + appconfig.Cfg.UID + "(.?)")
+	if uerr != nil {
+		log.Fatalf("Error compiling unique route regex: %s", err)
+	}
+	// consume unique messages
+	consumeFromMessages(uniqueMsgs, ureg)
+}
+
+func consumeFromMessages(messages <-chan amqp.Delivery, reg *regexp.Regexp) {
+	// consume messages from normal queue
+	for d := range messages {
 		// try to unmarshal incoming data
 		var payload map[string]interface{}
 		err := json.Unmarshal(d.Body, &payload)

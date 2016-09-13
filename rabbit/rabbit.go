@@ -12,6 +12,7 @@ var (
 	conn       *amqp.Connection
 	ch         *amqp.Channel
 	msgs       <-chan amqp.Delivery
+	uniqueMsgs <-chan amqp.Delivery
 	maxRetries = 3
 )
 
@@ -58,33 +59,42 @@ func ConnectToRabbit(retries int) {
 	)
 	failOnError(err, "Failed to declare an exchange")
 
+	// subscribe to normal messages
+	subscribeTo(config.RoutingKey, false)
+
+	// subscribe to messages from unique queue
+	subscribeTo(config.RoutingUniqueKey, true)
+}
+
+func subscribeTo(routingKey string, exclusive bool) {
+	// Create queue for normal message exchange
 	q, err := ch.QueueDeclare(
-		"",    // name
-		true,  // durable
-		true,  // delete when usused
-		true,  // exclusive
-		false, // no-wait
-		nil,   // arguments
+		"",        // name
+		true,      // durable
+		true,      // delete when usused
+		exclusive, // exclusive
+		false,     // no-wait
+		nil,       // arguments
 	)
 	failOnError(err, "Failed to declare a queue")
-
-	log.Infof("Binding queue %s to exchange %s with routing key %s", q.Name, config.Exchange, config.RoutingKey)
+	// Bind queue for normal message exchange
+	log.Infof("Binding queue %s to exchange %s with routing key %s", q.Name, config.Exchange, routingKey)
 	err = ch.QueueBind(
-		q.Name,            // queue name
-		config.RoutingKey, // routing key
-		config.Exchange,   // exchange
+		q.Name,          // queue name
+		routingKey,      // routing key
+		config.Exchange, // exchange
 		false,
 		nil)
 	failOnError(err, "Failed to bind a queue")
-
+	// consume from normal queue
 	msgs, err = ch.Consume(
-		q.Name, // queue
-		"",     // consumer
-		true,   // auto ack
-		false,  // exclusive
-		false,  // no local
-		false,  // no wait
-		nil,    // args
+		q.Name,    // queue
+		"",        // consumer
+		true,      // auto ack
+		exclusive, // exclusive
+		false,     // no local
+		false,     // no wait
+		nil,       // args
 	)
 	failOnError(err, "Failed to register a consumer")
 }
