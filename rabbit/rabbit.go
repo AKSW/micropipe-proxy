@@ -64,6 +64,9 @@ func ConnectToRabbit(retries int) {
 
 	// subscribe to messages from unique queue
 	subscribeTo(config.RoutingUniqueKey, true)
+
+	// start sending heartbeats
+	sendHeartBeats()
 }
 
 func subscribeTo(routingKey string, exclusive bool) {

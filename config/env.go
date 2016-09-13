@@ -1,6 +1,9 @@
 package config
 
-import "os"
+import (
+	"os"
+	"strconv"
+)
 
 var (
 	// Host points to RabbitMQ host
@@ -17,6 +20,8 @@ var (
 	ServerListen = ":8080"
 	// IsProduction determines if running in production env
 	IsProduction = false
+	// SendHeartbeats determines whether proxy should send service info to heartbeat rabbit topic
+	SendHeartbeats = false
 )
 
 // ReadEnvConfig reads config from environment
@@ -34,5 +39,12 @@ func ReadEnvConfig() {
 	envServerListen := os.Getenv("EXYNIZE_LISTEN")
 	if envServerListen != "" {
 		ServerListen = envServerListen
+	}
+	envSendHeartbeats := os.Getenv("EXYNIZE_HEARTBEATS")
+	if envSendHeartbeats != "" {
+		parsedHeartbeats, err := strconv.ParseBool(envSendHeartbeats)
+		if err != nil {
+			SendHeartbeats = parsedHeartbeats
+		}
 	}
 }
