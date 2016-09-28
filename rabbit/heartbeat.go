@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/AKSW/micropipe-proxy/config"
 	log "github.com/Sirupsen/logrus"
 	"github.com/streadway/amqp"
-	"gitlab.com/exynize/proxy/config"
 )
 
 // HeartbeatInfo to be sent over heartbeat topic
@@ -58,10 +58,10 @@ func sendHeartBeats() {
 			select {
 			case <-ticker.C:
 				err := ch.Publish(
-					config.Exchange,     // exchange
-					"exynize.heartbeat", // routing key
-					false,               // mandatory
-					false,               // immediate
+					config.Exchange,       // exchange
+					config.HeartbeatRoute, // routing key
+					false, // mandatory
+					false, // immediate
 					amqp.Publishing{
 						ContentType: "text/plain",
 						Body:        []byte(body),

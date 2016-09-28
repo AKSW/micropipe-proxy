@@ -9,11 +9,13 @@ var (
 	// Host points to RabbitMQ host
 	Host = "amqp://localhost:5672/"
 	// Exchange to be used with RabbitMQ
-	Exchange = "exynize"
+	Exchange = "microproxy"
 	// RoutingKey to be used with RabbitMQ
-	RoutingKey = "exynize.test"
+	RoutingKey = "microproxy.default"
 	// RoutingUniqueKey to be used with RabbitMQ
-	RoutingUniqueKey = "exynize.test.unique"
+	RoutingUniqueKey = "microproxy.default.unique"
+	// HeartbeatRoute to be used with RabbitMQ
+	HeartbeatRoute = "microproxy.heartbeats"
 	// ResponseEndpoint to be used for incoming messages
 	ResponseEndpoint = "http://localhost:3000/"
 	// ServerListen bind for server for replies
@@ -28,23 +30,27 @@ var (
 func ReadEnvConfig() {
 	// load config from environment
 	IsProduction = os.Getenv("GO_ENV") == "production"
-	envHost := os.Getenv("EXYNIZE_HOST")
+	envHost := os.Getenv("MICROPROXY_RABBIT_HOST")
 	if envHost != "" {
 		Host = envHost
 	}
-	envExchange := os.Getenv("EXYNIZE_EXCHANGE")
+	envExchange := os.Getenv("MICROPROXY_EXCHANGE")
 	if envExchange != "" {
 		Exchange = envExchange
 	}
-	envServerListen := os.Getenv("EXYNIZE_LISTEN")
+	envServerListen := os.Getenv("MICROPROXY_SERVER_LISTEN")
 	if envServerListen != "" {
 		ServerListen = envServerListen
 	}
-	envSendHeartbeats := os.Getenv("EXYNIZE_HEARTBEATS")
+	envSendHeartbeats := os.Getenv("MICROPROXY_HEARTBEATS")
 	if envSendHeartbeats != "" {
 		parsedHeartbeats, err := strconv.ParseBool(envSendHeartbeats)
 		if err != nil {
 			SendHeartbeats = parsedHeartbeats
 		}
+	}
+	envHeartbeat := os.Getenv("MICROPROXY_HEARTBEAT_ROUTE")
+	if envHeartbeat != "" {
+		HeartbeatRoute = envHeartbeat
 	}
 }

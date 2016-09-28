@@ -95,8 +95,9 @@ func ReadYamlConfig() {
 	Cfg.UID = uid.String()
 
 	// log
-	log.Infof("Got application config:")
-	log.Info(Cfg)
+	log.Infof("Got application config: %+v", Cfg)
+	// log.Info(Cfg)
+	// log.Infof("", Cfg)
 
 	// update configs
 	if Cfg.ResponseEndpoint != "" {

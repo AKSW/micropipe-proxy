@@ -3,9 +3,9 @@ package rabbit
 import (
 	"time"
 
+	"github.com/AKSW/micropipe-proxy/config"
 	log "github.com/Sirupsen/logrus"
 	"github.com/streadway/amqp"
-	"gitlab.com/exynize/proxy/config"
 )
 
 var (

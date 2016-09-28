@@ -1,9 +1,9 @@
 package app
 
 import (
+	"github.com/AKSW/micropipe-proxy/config"
 	log "github.com/Sirupsen/logrus"
 	"github.com/Sirupsen/logrus/formatters/logstash"
-	"gitlab.com/exynize/proxy/config"
 )
 
 // InitApp inits app

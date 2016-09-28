@@ -30,10 +30,10 @@ build:
 	go build
 
 build-linux:
-	GOOS=linux GOARCH=amd64 go build -o proxy-linux
+	GOOS=linux GOARCH=amd64 go build -o micropipe-proxy-linux
 
 rabbit:
-	docker run -d -p 5672:5672 -p 8081:15672 --name exynize-rabbit rabbitmq:management
+	docker run -d -p 5672:5672 -p 8081:15672 --name test-rabbit rabbitmq:management
 
 stop-rabbit:
-	docker stop exynize-rabbit
+	docker stop test-rabbit

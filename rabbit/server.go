@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"gitlab.com/exynize/proxy/config"
+	"github.com/AKSW/micropipe-proxy/config"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/streadway/amqp"

@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"regexp"
 
-	appconfig "gitlab.com/exynize/proxy/config"
+	appconfig "github.com/AKSW/micropipe-proxy/config"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/streadway/amqp"

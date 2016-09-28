@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/AKSW/micropipe-proxy/app"
+	"github.com/AKSW/micropipe-proxy/rabbit"
 	log "github.com/Sirupsen/logrus"
-	"gitlab.com/exynize/proxy/app"
-	"gitlab.com/exynize/proxy/rabbit"
 )
 
 func main() {

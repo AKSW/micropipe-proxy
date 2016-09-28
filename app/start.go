@@ -5,13 +5,14 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/AKSW/micropipe-proxy/config"
 	log "github.com/Sirupsen/logrus"
-	"gitlab.com/exynize/proxy/config"
 )
 
 func startApp() {
 	// parse command
 	parts := strings.Fields(config.Cfg.Command)
+	log.Infof("cmd: %s, parts: %s", config.Cfg.Command, parts)
 	executable := parts[0]
 	args := parts[1:]
 	log.Infof("Starting app with command: %s - and args: %s", executable, args)
