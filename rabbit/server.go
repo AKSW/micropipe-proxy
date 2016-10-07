@@ -24,7 +24,7 @@ func InitResponseServer() {
 		var data map[string]interface{}
 		err := decoder.Decode(&data)
 		if err != nil {
-			log.Errorf("Couldn't read request body")
+			log.Errorf("Couldn't read request body: %s", err)
 			return
 		}
 		log.Infof("Got request body: %s", data)
@@ -62,7 +62,7 @@ func InitResponseServer() {
 				ReplyTo:     replyTo,
 			})
 		failOnError(err, "Failed to publish a message")
-		log.Infof(" [x] Sent %s", body)
+		log.Infof(" [x] Sent to %s - %s", route, body)
 	})
 	// Health checks handler
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {

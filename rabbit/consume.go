@@ -51,7 +51,7 @@ func ConsumeMessages() {
 		log.Fatalf("Error compiling route regex: %s", err)
 	}
 	// consume normal messages
-	consumeFromMessages(msgs, reg)
+	consumeFromMessages(allMsgs, reg)
 
 	// prepare route replacement regex
 	ureg, uerr := regexp.Compile(appconfig.Cfg.ID + "-" + appconfig.Cfg.UID + "(.?)")

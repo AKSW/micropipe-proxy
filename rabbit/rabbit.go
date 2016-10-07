@@ -11,7 +11,7 @@ import (
 var (
 	conn       *amqp.Connection
 	ch         *amqp.Channel
-	msgs       <-chan amqp.Delivery
+	allMsgs    <-chan amqp.Delivery
 	uniqueMsgs <-chan amqp.Delivery
 	maxRetries = 3
 )
@@ -60,17 +60,21 @@ func ConnectToRabbit(retries int) {
 	failOnError(err, "Failed to declare an exchange")
 
 	// subscribe to normal messages
-	subscribeTo(config.RoutingKey, false)
+	subscribeTo(config.RoutingKey, "all")
 
 	// subscribe to messages from unique queue
-	subscribeTo(config.RoutingUniqueKey, true)
+	subscribeTo(config.RoutingUniqueKey, "unique")
 
 	// start sending heartbeats
 	sendHeartBeats()
 }
 
-func subscribeTo(routingKey string, exclusive bool) {
-	// Create queue for normal message exchange
+func subscribeTo(routingKey string, subType string) {
+	exclusive := false
+	if subType == "unique" {
+		exclusive = true
+	}
+	// Create queue for message exchange
 	q, err := ch.QueueDeclare(
 		"",        // name
 		true,      // durable
@@ -80,7 +84,7 @@ func subscribeTo(routingKey string, exclusive bool) {
 		nil,       // arguments
 	)
 	failOnError(err, "Failed to declare a queue")
-	// Bind queue for normal message exchange
+	// Bind queue for message exchange
 	log.Infof("Binding queue %s to exchange %s with routing key %s", q.Name, config.Exchange, routingKey)
 	err = ch.QueueBind(
 		q.Name,          // queue name
@@ -89,15 +93,27 @@ func subscribeTo(routingKey string, exclusive bool) {
 		false,
 		nil)
 	failOnError(err, "Failed to bind a queue")
-	// consume from normal queue
-	msgs, err = ch.Consume(
-		q.Name,    // queue
-		"",        // consumer
-		true,      // auto ack
-		exclusive, // exclusive
-		false,     // no local
-		false,     // no wait
-		nil,       // args
-	)
+	// consume from queue
+	if subType == "all" {
+		allMsgs, err = ch.Consume(
+			q.Name,    // queue
+			"",        // consumer
+			true,      // auto ack
+			exclusive, // exclusive
+			false,     // no local
+			false,     // no wait
+			nil,       // args
+		)
+	} else {
+		uniqueMsgs, err = ch.Consume(
+			q.Name,    // queue
+			"",        // consumer
+			true,      // auto ack
+			exclusive, // exclusive
+			false,     // no local
+			false,     // no wait
+			nil,       // args
+		)
+	}
 	failOnError(err, "Failed to register a consumer")
 }
