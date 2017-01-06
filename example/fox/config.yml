@@ -1,0 +1,39 @@
+# basic application info
+id: fox
+image: fox-service
+name: FOX service
+description: |
+  A simple service that provides access to FOX capabilities
+version: v1
+
+# command to be executed as child service
+command: node index.js
+
+# response endpoint
+responseEndpoint: http://localhost:3000
+
+# input schema
+inputSchema:
+  type: object
+  properties:
+    text:
+      type: string
+  required:
+    - text
+
+# output schema
+outputSchema:
+  type: object
+  properties:
+    text:
+      type: string
+    #sentiments:
+      #type: array
+      #minItems: 1
+
+# config schema
+# configSchema:
+  # type: object
+  # properties:
+    # test:
+      # type: string

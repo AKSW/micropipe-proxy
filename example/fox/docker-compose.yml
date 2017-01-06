@@ -1,0 +1,24 @@
+version: '2'
+services:
+  fox-proxy:
+    build: ./
+    links:
+      - fox:fox
+      - rabbit:rabbit
+    environment:
+      - MICROPROXY_RABBIT_HOST=amqp://rabbit:5672/
+      - FOX_URL=http://fox:4444/api
+    depends_on:
+      - rabbit
+    ports:
+      - 8080:8080
+
+  fox:
+    image: bde2020/fox
+    environment:
+      - LNG=en
+
+  rabbit:
+    image: rabbitmq
+    ports:
+      - 5672:5672
