@@ -52,7 +52,7 @@ func ConnectToRabbit(retries int) {
 		config.Exchange, // name
 		"topic",         // type
 		true,            // durable
-		false,           // auto-deleted
+		true,           // auto-deleted
 		false,           // internal
 		false,           // no-wait
 		nil,             // arguments

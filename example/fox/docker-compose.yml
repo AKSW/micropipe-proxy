@@ -14,11 +14,14 @@ services:
       - 8080:8080
 
   fox:
-    image: bde2020/fox
+    image: mwauer/fox:2.3.0
     environment:
       - LNG=en
+    ports:
+      - 4444:4444
 
   rabbit:
-    image: rabbitmq
+    image: rabbitmq:management
     ports:
       - 5672:5672
+      - 8081:15672
